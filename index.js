@@ -1,6 +1,8 @@
+/* jshint node: true */
 var BasePlugin = require('ember-cli-deploy-plugin');
 var minimatch = require('minimatch');
 var Uploader = require('./lib/uploader');
+var RSVP = require('rsvp');
 
 module.exports = {
   name: 'ember-cli-deploy-cobot-scss',
@@ -35,10 +37,14 @@ module.exports = {
           baseDir: this.readConfig('distDir'),
           logger: this
         });
-        return uploader.uploadFiles(filesToUpload, blankOut).then(function() {
-          that.log('Done uploading SCSS.');
-        }, function(error) {
-          that.log('Error uploading SCSS: ' + error, { color: 'red' });
+        return new RSVP.Promise(function(resolve, reject) {
+          uploader.uploadFiles(filesToUpload, blankOut).then(function() {
+            that.log('Done uploading SCSS.');
+            resolve();
+          }, function(error) {
+            that.log('Error uploading SCSS: ' + error, { color: 'red' });
+            reject(error);
+          });
         });
       }
     });
